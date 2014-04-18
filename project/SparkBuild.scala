@@ -49,8 +49,8 @@ object SparkBuild extends Build {
   val HBASE_VERSION = "0.94.6"
 
   // Target JVM version
-  val SCALAC_JVM_VERSION = "jvm-1.6"
-  val JAVAC_JVM_VERSION = "1.6"
+  val SCALAC_JVM_VERSION = "jvm-1.7"
+  val JAVAC_JVM_VERSION = "1.7"
 
   lazy val root = Project("root", file("."), settings = rootSettings) aggregate(allProjects: _*)
 
@@ -132,25 +132,25 @@ object SparkBuild extends Build {
   lazy val maybeYarnRef: Seq[ProjectReference] = if (isYarnEnabled) Seq(if (isNewHadoop) yarn else yarnAlpha) else Seq()
 
   lazy val externalTwitter = Project("external-twitter", file("external/twitter"), settings = twitterSettings)
-    .dependsOn(streaming % "compile->compile;test->test")
+    .dependsOn(core) dependsOn(streaming % "compile->compile;test->test")
 
   lazy val externalKafka = Project("external-kafka", file("external/kafka"), settings = kafkaSettings)
-    .dependsOn(streaming % "compile->compile;test->test")
+    .dependsOn(core) dependsOn(streaming % "compile->compile;test->test")
 
   lazy val externalFlume = Project("external-flume", file("external/flume"), settings = flumeSettings)
-    .dependsOn(streaming % "compile->compile;test->test")
+    .dependsOn(core) dependsOn(streaming % "compile->compile;test->test")
 
   lazy val externalZeromq = Project("external-zeromq", file("external/zeromq"), settings = zeromqSettings)
-    .dependsOn(streaming % "compile->compile;test->test")
+    .dependsOn(core) dependsOn(streaming % "compile->compile;test->test")
 
   lazy val externalMqtt = Project("external-mqtt", file("external/mqtt"), settings = mqttSettings)
-    .dependsOn(streaming % "compile->compile;test->test")
+    .dependsOn(core) dependsOn(streaming % "compile->compile;test->test")
 
   lazy val allExternal = Seq[ClasspathDependency](externalTwitter, externalKafka, externalFlume, externalZeromq, externalMqtt)
   lazy val allExternalRefs = Seq[ProjectReference](externalTwitter, externalKafka, externalFlume, externalZeromq, externalMqtt)
 
   lazy val examples = Project("examples", file("examples"), settings = examplesSettings)
-    .dependsOn(core, mllib, graphx, bagel, streaming, hive) dependsOn(allExternal: _*)
+    .dependsOn(core, mllib, graphx, bagel, streaming, hive, sql) dependsOn(allExternal: _*)
 
   // Everything except assembly, hive, tools, java8Tests and examples belong to packageProjects
   lazy val packageProjects = Seq[ProjectReference](core, repl, bagel, streaming, mllib, graphx, catalyst, sql) ++ maybeYarnRef ++ maybeHiveRef ++ maybeGangliaRef
